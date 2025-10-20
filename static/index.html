@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+ <title>Mở Thư 20/10 💌</title>
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+<style>
+:root{
+  --bg1:#ffe6f2; --bg2:#ffd6e7;
+  --pink:#ff5f8c; --pink2:#ff94b3; --pink3:#ffc1d2;
+  --card-w: 420px; --card-h: 280px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+ body{
+   min-height:100vh;
+   background:linear-gradient(135deg,var(--bg1),var(--bg2));
+   font-family:"Inter", "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+   display:flex;flex-direction:column;align-items:center;justify-content:center;
+   overflow:hidden;
+ }
+
+/* Upload */
+.upload{
+  width:min(92vw,360px);
+  background:#fff;border-radius:20px;padding:26px 22px;
+  box-shadow:0 12px 32px rgba(255,105,180,.25);
+  text-align:center;
+}
+.upload h2{color:var(--pink);margin-bottom:16px;font-weight:800}
+input[type=file]{display:none}
+.choose-btn{
+  display:inline-block;padding:12px 24px;border-radius:999px;border:0;
+  background:linear-gradient(145deg,#ff85b3,var(--pink));
+  color:#fff;font-weight:700;cursor:pointer;
+  box-shadow:0 8px 20px rgba(255,105,180,.35);
+  transition:.25s;
+}
+.choose-btn:hover{transform:translateY(-2px)}
+ .note{margin-top:10px;color:#666;font-size:13px;display:none}
+
+/* Crop Modal */
+.crop-modal{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.8);z-index:9999;display:none;
+  justify-content:center;align-items:center;padding:20px;
+}
+.crop-container{
+  background:#fff;border-radius:15px;padding:20px;max-width:90vw;max-height:90vh;
+  box-shadow:0 20px 40px rgba(0,0,0,0.3);
+}
+.crop-header{
+  text-align:center;margin-bottom:20px;
+}
+.crop-header h3{
+  color:var(--pink);font-weight:700;margin-bottom:10px;
+}
+.crop-preview{
+  width:100%;max-width:600px;height:300px;margin:0 auto 20px;
+  border-radius:10px;overflow:hidden;
+}
+.crop-buttons{
+  display:flex;gap:15px;justify-content:center;flex-wrap:wrap;
+}
+.crop-btn{
+  padding:10px 20px;border:none;border-radius:25px;font-weight:600;
+  cursor:pointer;transition:all 0.3s ease;
+}
+.crop-btn.primary{
+  background:linear-gradient(145deg,var(--pink),var(--pink2));
+  color:#fff;box-shadow:0 5px 15px rgba(255,105,180,0.4);
+}
+.crop-btn.secondary{
+  background:#f0f0f0;color:#666;
+}
+.crop-btn:hover{
+  transform:translateY(-2px);
+}
+ .crop-btn.primary:hover{
+   box-shadow:0 8px 25px rgba(255,105,180,0.6);
+ }
+
+/* Download button */
+.download-section{
+   position:fixed;bottom:20px;right:20px;z-index:1000;
+}
+.download-btn{
+   background:linear-gradient(145deg,var(--pink),var(--pink2));
+   color:#fff;border:none;border-radius:50px;padding:12px 20px;
+   font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(255,105,180,0.4);
+   transition:all 0.3s ease;display:none;
+}
+.download-btn:hover{
+   transform:translateY(-2px);box-shadow:0 8px 25px rgba(255,105,180,0.6);
+}
+.download-btn:active{transform:translateY(0);}
+
+/* Envelope */
+.stage{
+  width:var(--card-w);height:calc(var(--card-h)+120px);
+  margin-top:42px;position:relative;display:none;cursor:pointer;
+  perspective:1200px;
+}
+.env{
+  position:absolute;left:50%;transform:translateX(-50%);
+  width:var(--card-w);height:var(--card-h);
+  filter:drop-shadow(0 18px 40px rgba(0,0,0,.25));
+}
+.env .pocket{position:absolute;inset:0;}
+.env .flap{
+  position:absolute;left:0;right:0;top:0;height:55%;
+  clip-path:polygon(0 0,100% 0,50% 100%);
+  background:linear-gradient(180deg,var(--pink),#ff3f7e);
+  transform-origin:50% 0%;transform:rotateX(0deg);
+  transition:transform .8s cubic-bezier(.2,.7,.2,1);
+  z-index:4;box-shadow:0 10px 18px rgba(0,0,0,.15);
+}
+ .env .base{position:absolute;inset:0;border-radius:12px;background:linear-gradient(180deg,var(--pink2),var(--pink))}
+ .env .open-text{
+   position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+   color:#fff;font-weight:700;font-size:18px;text-shadow:0 2px 4px rgba(0,0,0,0.3);
+   z-index:5;pointer-events:none;opacity:1;
+   transition:opacity 0.5s ease;
+ }
+ .stage.stage1 .env .open-text{opacity:0;}
+
+/* Cards stack */
+.stack{
+  position:absolute;left:50%;top:18%;
+  width:var(--card-w);height:var(--card-h);
+  transform:translateX(-50%);transform-style:preserve-3d;
+}
+ .card{
+   position:absolute;left:50%;top:0;transform:translate(-50%,0);
+   width:var(--card-w);height:var(--card-h);
+   border-radius:12px;overflow:visible;background:transparent;
+   box-shadow:0 12px 26px rgba(0,0,0,.22);
+   backface-visibility:hidden;transition:transform .9s cubic-bezier(.2,.7,.2,1),opacity .6s ease,box-shadow .6s ease;
+ }
+ .card img{width:100%;height:100%;object-fit:contain;border-radius:12px;}
+
+/* initial positions */
+.card.front{z-index:3;transform:translate(-50%,40%) rotateX(-88deg) scale(.96);opacity:0;}
+.card.back{z-index:2;transform:translate(-50%,44%) rotate(-2deg) scale(.94);opacity:0;}
+
+/* Stage 1: open flap + front card out */
+.stage.stage1 .env .flap{transform:rotateX(-165deg);}
+.stage.stage1 .card.front{
+  transform:translate(-50%,-28%) translateZ(90px) rotateX(0deg) scale(1.02);
+  opacity:1;
+  box-shadow:0 24px 50px rgba(0,0,0,.35),0 0 26px rgba(255,105,180,.55);
+  animation:glow 2.2s ease-in-out infinite;
+}
+@keyframes glow{
+  0%{box-shadow:0 24px 50px rgba(0,0,0,.35),0 0 18px rgba(255,105,180,.35);}
+  50%{box-shadow:0 28px 56px rgba(0,0,0,.38),0 0 34px rgba(255,105,180,.75);}
+  100%{box-shadow:0 24px 50px rgba(0,0,0,.35),0 0 18px rgba(255,105,180,.35);}
+}
+
+ /* Stage 2: bring back card in front */
+ .stage.stage2 .card.back{
+   opacity:1;
+   transform:translate(-50%,-40%) translateZ(130px) rotate(1deg) scale(1.04);
+   z-index:5;
+   box-shadow:0 28px 60px rgba(0,0,0,.35),0 0 36px rgba(255,105,180,.7);
+ }
+ .stage.stage2 .card.front{
+   opacity:0.5;
+ }
+
+/* reset */
+.hidden{display:none}
+
+/* Responsive for mobile */
+@media (max-width: 768px) {
+  :root{
+    --card-w: min(90vw, 360px);
+    --card-h: min(60vw, 240px);
+  }
+  
+  body{
+    padding: 10px;
+    min-height: 100vh;
+  }
+  
+  .upload{
+    width: min(95vw, 340px);
+    padding: 20px 18px;
+  }
+  
+  .upload h2{
+    font-size: 1.1rem;
+    margin-bottom: 14px;
+  }
+  
+  .choose-btn{
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+  
+  .stage{
+    width: var(--card-w);
+    height: calc(var(--card-h) + 100px);
+    margin-top: 30px;
+  }
+  
+  .env{
+    width: var(--card-w);
+    height: var(--card-h);
+  }
+  
+  .stack{
+    width: var(--card-w);
+    height: var(--card-h);
+  }
+  
+  .card{
+    width: var(--card-w);
+    height: var(--card-h);
+  }
+}
+
+@media (max-width: 480px) {
+  :root{
+    --card-w: min(95vw, 320px);
+    --card-h: min(55vw, 200px);
+  }
+  
+  .upload{
+    width: min(98vw, 300px);
+    padding: 16px 14px;
+  }
+  
+  .upload h2{
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+  
+  .choose-btn{
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  
+  .stage{
+    margin-top: 20px;
+  }
+}
+</style>
+</head>
+<body>
+ <form class="upload" id="uploadForm" enctype="multipart/form-data">
+   <h2>Món quà nho nho dành tặng cho bạn</h2>
+   <label for="image"><span class="choose-btn">Cho mình xin 1 tấm ảnh nhé</span></label>
+   <input id="image" name="image" type="file" accept="image/*" required/>
+   <div class="note" id="loading">Đang xử lý...</div>
+</form>
+
+ <!-- Crop Modal -->
+ <div class="crop-modal" id="cropModal">
+   <div class="crop-container">
+     <div class="crop-header">
+       <h3>Hãy chọn khung hình có bạn ở trỏng nhé !</h3>
+     </div>
+     <div class="crop-preview">
+       <img id="cropImage" style="max-width:100%;height:100%;object-fit:contain;">
+     </div>
+     <div class="crop-buttons">
+       <button type="button" class="crop-btn secondary" id="cancelCrop">Hủy</button>
+       <button type="button" class="crop-btn primary" id="confirmCrop">Nhận quà ngay</button>
+     </div>
+   </div>
+ </div>
+
+ <div class="stage" id="stage">
+   <div class="env">
+     <div class="base"></div>
+     <div class="pocket"></div>
+     <div class="flap"></div>
+     <div class="open-text">Mở liền nè !</div>
+   </div>
+  <div class="stack">
+    <div class="card front"><img id="imgFront" alt="Ảnh 1"/></div>
+    <div class="card back"><img src="frame2.png" alt="Ảnh 2"/></div>
+  </div>
+</div>
+
+<!-- Download Button -->
+<div class="download-section">
+  <button class="download-btn" id="downloadBtn">Bấm vào đây để tải về</button>
+</div>
+
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+ <script>
+ const input=document.getElementById('image');
+ const loading=document.getElementById('loading');
+ const form=document.getElementById('uploadForm');
+ const stage=document.getElementById('stage');
+ const imgFront=document.getElementById('imgFront');
+ const cropModal=document.getElementById('cropModal');
+ const cropImage=document.getElementById('cropImage');
+ const cancelCrop=document.getElementById('cancelCrop');
+ const confirmCrop=document.getElementById('confirmCrop');
+ const downloadBtn=document.getElementById('downloadBtn');
+ let stageIndex=0;
+ let cropper=null;
+ let originalFile=null;
+
+ input.addEventListener('change',(e)=>{
+   const file=e.target.files?.[0];
+   if(!file)return;
+   originalFile=file;
+   
+   const reader=new FileReader();
+   reader.onload=(e)=>{
+     cropImage.src=e.target.result;
+     cropModal.style.display='flex';
+     
+     // Initialize cropper with 10:6 aspect ratio
+     setTimeout(()=>{
+       cropper=new Cropper(cropImage,{
+         aspectRatio:10/6,
+         viewMode:1,
+         dragMode:'move',
+         autoCropArea:0.8,
+         restore:false,
+         guides:true,
+         center:true,
+         highlight:true,
+         cropBoxMovable:true,
+         cropBoxResizable:true,
+         toggleDragModeOnDblclick:false,
+         background:false
+       });
+     },100);
+   };
+   reader.readAsDataURL(file);
+ });
+
+ cancelCrop.addEventListener('click',()=>{
+   cropModal.style.display='none';
+   if(cropper){
+     cropper.destroy();
+     cropper=null;
+   }
+   input.value='';
+ });
+
+ confirmCrop.addEventListener('click',async()=>{
+   if(!cropper)return;
+   
+   const canvas=cropper.getCroppedCanvas({
+     width:1000,
+     height:600,
+     imageSmoothingEnabled:true,
+     imageSmoothingQuality:'high'
+   });
+   
+   if(!canvas)return;
+   
+   canvas.toBlob(async(blob)=>{
+     const fd=new FormData();
+     fd.append('image',blob,'cropped-image.jpg');
+     fd.append('pink_strength',0.1);
+     
+     loading.style.display='block';
+     cropModal.style.display='none';
+     
+     try{
+       const res=await fetch('https://womenday.caohoangphuc.id.vn/apply_frame',{method:'POST',body:fd});
+       let b64=await res.text();
+       b64=b64.replace(/^"|"$/g,'');
+       imgFront.src=`data:image/png;base64,${b64}`;
+       form.style.display='none';
+       stage.style.display='block';
+       stage.classList.remove('stage1','stage2');
+       stageIndex=0;
+       downloadBtn.style.display='block';
+     }catch(e){alert('Lỗi: '+e.message)}
+     finally{loading.style.display='none'}
+     
+     if(cropper){
+       cropper.destroy();
+       cropper=null;
+     }
+   },'image/jpeg',0.9);
+ });
+
+ stage.addEventListener('click',()=>{
+   if(stageIndex===0){
+     stage.classList.add('stage1');stageIndex=1;
+   }else if(stageIndex===1){
+     stage.classList.add('stage2');stageIndex=2;
+   }else{
+     stage.classList.remove('stage1','stage2');stageIndex=0;
+   }
+ });
+
+ // Download merged image
+ downloadBtn.addEventListener('click',()=>{
+   const canvas=document.createElement('canvas');
+   const ctx=canvas.getContext('2d');
+   
+   // Set canvas size (width of front image, height = front + back)
+   const frontImg=document.getElementById('imgFront');
+   const backImg=document.querySelector('.card.back img');
+   
+   if(!frontImg.src || !backImg.src) return;
+   
+   // Wait for images to load
+   Promise.all([
+     new Promise(resolve=>{
+       const img1=new Image();
+       img1.onload=()=>resolve({img:img1,width:img1.width,height:img1.height});
+       img1.src=frontImg.src;
+     }),
+     new Promise(resolve=>{
+       const img2=new Image();
+       img2.onload=()=>resolve({img:img2,width:img2.width,height:img2.height});
+       img2.src=backImg.src;
+     })
+   ]).then(([front,back])=>{
+     // Scale front image width to match back image width
+     const scaleRatio=back.width/front.width;
+     const scaledFrontHeight=front.height*scaleRatio;
+     
+     // Calculate dimensions
+     const canvasWidth=back.width;
+     const canvasHeight=scaledFrontHeight+back.height;
+     
+     canvas.width=canvasWidth;
+     canvas.height=canvasHeight;
+     
+     // Draw front image at top (scaled to match back width)
+     ctx.drawImage(front.img,0,0,back.width,scaledFrontHeight);
+     
+     // Draw back image below front image
+     ctx.drawImage(back.img,0,scaledFrontHeight,back.width,back.height);
+     
+     // Download
+     const link=document.createElement('a');
+     link.download='anh-ghep-20-10.png';
+     link.href=canvas.toDataURL('image/png');
+     link.click();
+   });
+ });
+ </script>
+</body>
+</html>

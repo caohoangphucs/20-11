@@ -1,0 +1,9 @@
+nohup: ignoring input
+INFO:     Will watch for changes in these directories: ['/home/ubuntu/20-10']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [2425138] using StatReload
+INFO:     Started server process [2425140]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     115.76.51.15:0 - "GET / HTTP/1.1" 200 OK
+INFO:     115.76.51.15:0 - "POST /apply_frame HTTP/1.1" 200 OK
