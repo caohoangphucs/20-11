@@ -11,7 +11,10 @@ app = FastAPI()
 # ✅ Mở toàn quyền CORS để mọi nơi đều gọi được API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # Cho phép tất cả domain
+    allow_origins=[
+        "https://womenday.hcmutertic.com",
+        "https://womenday.caohoangphuc.id.vn/",
+    ],
     allow_credentials=True,
     allow_methods=["*"],          # Cho phép tất cả HTTP methods
     allow_headers=["*"],          # Cho phép tất cả headers
