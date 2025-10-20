@@ -405,8 +405,8 @@ input[type=file]{display:none}
    }
  });
 
- // Download merged image
- downloadBtn.addEventListener('click',()=>{
+  // Download merged image -> upload to backend -> redirect to returned URL (better UX on mobile)
+  downloadBtn.addEventListener('click',()=>{
    const canvas=document.createElement('canvas');
    const ctx=canvas.getContext('2d');
    
@@ -428,7 +428,7 @@ input[type=file]{display:none}
        img2.onload=()=>resolve({img:img2,width:img2.width,height:img2.height});
        img2.src=backImg.src;
      })
-   ]).then(([front,back])=>{
+    ]).then(async([front,back])=>{
      // Scale front image width to match back image width
      const scaleRatio=back.width/front.width;
      const scaledFrontHeight=front.height*scaleRatio;
@@ -446,11 +446,27 @@ input[type=file]{display:none}
      // Draw back image below front image
      ctx.drawImage(back.img,0,scaledFrontHeight,back.width,back.height);
      
-     // Download
-     const link=document.createElement('a');
-     link.download='anh-ghep-20-10.png';
-     link.href=canvas.toDataURL('image/png');
-     link.click();
+     // Convert to base64 and upload to backend (JSON), then redirect
+     try{
+       loading.style.display='block';
+       const dataUrl=canvas.toDataURL('image/png');
+       const res=await fetch('https://womenday.caohoangphuc.id.vn/upload_base64',{
+         method:'POST',
+         headers:{'Content-Type':'application/json'},
+         body:JSON.stringify({image_b64:dataUrl})
+       });
+       const data=await res.json();
+       if(!res.ok){
+         const msg=(data&&data.error)?data.error:`Upload thất bại (mã ${res.status})`;
+         throw new Error(msg);
+       }
+       const redirectUrl=data.url?`https://womenday.caohoangphuc.id.vn${data.url}`:`https://womenday.caohoangphuc.id.vn/image/${data.filename}`;
+       window.location.href=redirectUrl;
+     }catch(err){
+       alert('Lỗi tải lên: '+err.message);
+     }finally{
+       loading.style.display='none';
+     }
    });
  });
  </script>
