@@ -99,6 +99,18 @@ input[type=file]{display:none}
 }
 .download-btn:active{transform:translateY(0);}
 
+/* Loading overlay */
+.loading-overlay{
+  position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.35);z-index:2000;
+}
+.spinner{
+  width:56px;height:56px;border:6px solid rgba(255,255,255,.35);
+  border-top-color:#fff;border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
 /* Envelope */
 .stage{
   width:var(--card-w);height:calc(var(--card-h)+120px);
@@ -252,6 +264,7 @@ input[type=file]{display:none}
 </style>
 </head>
 <body>
+ <div class="loading-overlay" id="globalLoading"><div class="spinner"></div></div>
  <form class="upload" id="uploadForm" enctype="multipart/form-data">
    <h2>Món quà nho nho dành tặng cho bạn</h2>
    <label for="image"><span class="choose-btn">Cho mình xin 1 tấm ảnh nhé</span></label>
@@ -305,6 +318,7 @@ input[type=file]{display:none}
  const cancelCrop=document.getElementById('cancelCrop');
  const confirmCrop=document.getElementById('confirmCrop');
  const downloadBtn=document.getElementById('downloadBtn');
+ const globalLoading=document.getElementById('globalLoading');
  let stageIndex=0;
  let cropper=null;
  let originalFile=null;
@@ -369,8 +383,9 @@ input[type=file]{display:none}
      loading.style.display='block';
      cropModal.style.display='none';
      
-     try{
-       const res=await fetch('https://womenday.caohoangphuc.id.vn/apply_frame',{method:'POST',body:fd});
+    try{
+      globalLoading.style.display='flex';
+      const res=await fetch('https://womenday.caohoangphuc.id.vn/apply_frame',{method:'POST',body:fd});
        let b64=await res.text();
        b64=b64.replace(/^"|"$/g,'');
        imgFront.src=`data:image/png;base64,${b64}`;
@@ -379,8 +394,8 @@ input[type=file]{display:none}
        stage.classList.remove('stage1','stage2');
        stageIndex=0;
        downloadBtn.style.display='block';
-     }catch(e){alert('Lỗi: '+e.message)}
-     finally{loading.style.display='none'}
+    }catch(e){alert('Lỗi: '+e.message)}
+    finally{loading.style.display='none';globalLoading.style.display='none'}
      
      if(cropper){
        cropper.destroy();
@@ -449,6 +464,7 @@ input[type=file]{display:none}
      // Convert to base64 and upload to backend (JSON), then redirect
      try{
        loading.style.display='block';
+       globalLoading.style.display='flex';
        const dataUrl=canvas.toDataURL('image/png');
        const res=await fetch('https://womenday.caohoangphuc.id.vn/upload_base64',{
          method:'POST',
@@ -466,6 +482,7 @@ input[type=file]{display:none}
        alert('Lỗi tải lên: '+err.message);
      }finally{
        loading.style.display='none';
+       globalLoading.style.display='none';
      }
    });
  });
